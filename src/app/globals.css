@@ -1,8 +1,68 @@
 @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;200;300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-brand-red: #C8102E;
+  --color-brand-red-dark: #A50D25;
+  --color-brand-red-light: #E8173A;
+  --color-brand-black: #0B0B0D;
+  --color-brand-dark-bg: #111113;
+  --color-brand-light-bg: #F7F7F5;
+  --color-brand-primary: #161616;
+  --color-brand-secondary: #6B6B6B;
+  --color-brand-neutral: #E9E6E1;
+  --color-brand-white: #FFFFFF;
+
+  --font-persian: 'Vazirmatn', 'IRANSansX', 'Dana', 'Tahoma', 'Arial', sans-serif;
+  --font-latin: 'Inter', 'Helvetica Neue', 'Arial', sans-serif;
+  --font-sans: 'Vazirmatn', 'Inter', 'Helvetica Neue', 'Arial', sans-serif;
+
+  --spacing-18: 4.5rem;
+  --spacing-88: 22rem;
+  --spacing-128: 32rem;
+
+  --text-7xl: 4.5rem;
+  --text-7xl--line-height: 1.05;
+  --text-8xl: 6rem;
+  --text-8xl--line-height: 1;
+  --text-9xl: 8rem;
+  --text-9xl--line-height: 0.9;
+
+  --animate-fade-up: fadeUp 0.8s ease forwards;
+  --animate-fade-in: fadeIn 0.6s ease forwards;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+  --background-image-gradient-radial: radial-gradient(var(--tw-gradient-stops));
+  --background-image-gradient-conic: conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops));
+  --background-image-hero-pattern: linear-gradient(135deg, #0B0B0D 0%, #1a0a0e 50%, #0B0B0D 100%);
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
 :root {
   --brand-red: #C8102E;
@@ -45,26 +105,6 @@ body {
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: var(--brand-light-bg); }
 ::-webkit-scrollbar-thumb { background: var(--brand-red); border-radius: 2px; }
-
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(40px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
-}
-
-@keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
 
 .animate-fade-up { animation: fadeUp 0.8s ease forwards; }
 .animate-fade-in { animation: fadeIn 0.6s ease forwards; }
@@ -152,7 +192,6 @@ body {
   background-size: 60px 60px;
 }
 
-/* Premium border gradient */
 .border-gradient-red {
   border: 1px solid transparent;
   background-clip: padding-box;
@@ -172,7 +211,6 @@ body {
   pointer-events: none;
 }
 
-/* Text clamp utilities */
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -186,39 +224,21 @@ body {
   overflow: hidden;
 }
 
-/* Premium noise texture overlay */
-.noise-overlay::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-  pointer-events: none;
-  opacity: 0.3;
-}
-
-/* Smooth page transitions */
-@keyframes pageIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
 main {
   animation: pageIn 0.5s ease forwards;
 }
 
-/* Premium focus ring */
 :focus-visible {
   outline: 2px solid #C8102E;
   outline-offset: 2px;
 }
 
-/* Hide number input spinners */
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-/* Select arrow RTL */
 select {
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B6B6B' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
