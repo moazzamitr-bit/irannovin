@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import FloatingCTA from "@/components/FloatingCTA";
 
 export const metadata: Metadata = {
   title: "کانون ایران‌نوین | گروه تبلیغات و بازاریابی یکپارچه",
@@ -30,7 +31,8 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-[#F7F7F5] text-[#161616]" style={{ fontFamily: "'Vazirmatn', 'Inter', sans-serif" }}>
         {children}
-      </body>
+        <FloatingCTA />
+</body>
     </html>
   );
 }
