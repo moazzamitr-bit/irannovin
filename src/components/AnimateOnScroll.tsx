@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { motion } from "framer-motion";
 
 interface Props {
   children: React.ReactNode;
@@ -9,27 +9,15 @@ interface Props {
 }
 
 export default function AnimateOnScroll({ children, className = "", delay = 0 }: Props) {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setTimeout(() => el.classList.add("visible"), delay);
-          observer.unobserve(el);
-        }
-      },
-      { threshold: 0.1 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [delay]);
-
   return (
-    <div ref={ref} className={`animate-on-scroll ${className}`}>
+    <motion.div
+      initial={{ opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.65, delay: delay / 1000, ease: "easeOut" }}
+      className={className}
+    >
       {children}
-    </div>
+    </motion.div>
   );
 }
