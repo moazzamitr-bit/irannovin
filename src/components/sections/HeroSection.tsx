@@ -43,50 +43,45 @@ const features = [
 export default function HeroSection() {
   return (
     <section className="relative min-h-screen flex flex-col justify-center overflow-hidden">
-      {/* Background */}
       <div className="absolute inset-0 z-0">
         <div
           className="absolute inset-0"
           style={{
-            background: `
-              linear-gradient(to right, rgba(10,10,11,0.95) 40%, rgba(10,10,11,0.5) 70%, rgba(10,10,11,0.3) 100%),
-              url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1800&q=80') center/cover no-repeat
-            `,
+            background: `linear-gradient(to right, rgba(10,10,11,0.95) 40%, rgba(10,10,11,0.5) 70%, rgba(10,10,11,0.3) 100%), url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1800&q=80') center/cover no-repeat`,
           }}
         />
-        <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(10,10,11,0.3) 0%, transparent 30%, transparent 70%, rgba(10,10,11,0.8) 100%)" }} />
+        <div
+          className="absolute inset-0"
+          style={{
+            background: "linear-gradient(to bottom, rgba(10,10,11,0.3) 0%, transparent 30%, transparent 70%, rgba(10,10,11,0.8) 100%)",
+          }}
+        />
       </div>
 
-      {/* Slide indicators - right side */}
       <div className="absolute right-8 top-1/2 -translate-y-1/2 z-10 flex flex-col gap-3">
         {["01", "02", "03", "04"].map((n, i) => (
-          <div key={n} className={`text-xs font-mono transition-all ${i === 0 ? "text-[#c8973d]" : "text-gray-600"}`}>
+          <div key={n} className={`text-xs font-mono ${i === 0 ? "text-[#c8973d]" : "text-gray-600"}`}>
             {n}
           </div>
         ))}
       </div>
 
-      {/* Content */}
       <div className="relative z-10 max-w-[1400px] mx-auto px-6 pt-24 pb-16">
-        {/* Tag */}
         <p className="text-[#c8973d] text-xs font-semibold tracking-[0.3em] uppercase mb-6">
-          STRATEGIC ENERGY & INDUSTRIAL SUPPLY PARTNER
+          STRATEGIC ENERGY &amp; INDUSTRIAL SUPPLY PARTNER
         </p>
 
-        {/* Headline */}
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-white leading-none tracking-tight mb-6 max-w-3xl">
           POWERING INDUSTRY.
           <br />
           DELIVERING TRUST.
         </h1>
 
-        {/* Subtitle */}
         <p className="text-gray-300 text-base max-w-lg mb-10 leading-relaxed">
           Khabargan Energy connects global resources with regional potential
           through secure supply, technical excellence and unwavering commitment.
         </p>
 
-        {/* Feature icons */}
         <div className="flex flex-wrap gap-6 mb-10">
           {features.map((f, i) => (
             <div key={i} className="flex items-center gap-2">
@@ -100,7 +95,6 @@ export default function HeroSection() {
           ))}
         </div>
 
-        {/* CTA buttons */}
         <div className="flex flex-wrap gap-4">
           <Link
             href="/capabilities"
