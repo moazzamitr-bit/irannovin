@@ -1,65 +1,50 @@
-import Link from "next/link";
-import AnimateOnScroll from "@/components/AnimateOnScroll";
-
 const industries = [
-  { icon: "🏦", name: "بانک، بیمه و فین‌تک", en: "Banking & Fintech", count: "۱۲+ پروژه" },
-  { icon: "🛒", name: "FMCG و مواد غذایی", en: "FMCG & Food", count: "۲۰+ پروژه" },
-  { icon: "🚗", name: "خودرو", en: "Automotive", count: "۱۵+ پروژه" },
-  { icon: "📱", name: "لوازم خانگی", en: "Home Appliances", count: "۸+ پروژه" },
-  { icon: "📡", name: "تلکام و پلتفرم", en: "Telecom & Platforms", count: "۱۰+ پروژه" },
-  { icon: "🏗️", name: "مسکن و ساخت‌وساز", en: "Real Estate", count: "۹+ پروژه" },
-  { icon: "🛍️", name: "خرده‌فروشی", en: "Retail", count: "۱۴+ پروژه" },
-  { icon: "✈️", name: "گردشگری و هتل", en: "Tourism & Hospitality", count: "۶+ پروژه" },
-  { icon: "🏥", name: "سلامت", en: "Healthcare", count: "۷+ پروژه" },
-  { icon: "🏭", name: "B2B و صنعتی", en: "B2B & Industrial", count: "۵+ پروژه" },
+  {
+    label: "OIL & GAS",
+    img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&q=80",
+  },
+  {
+    label: "PETROCHEMICAL",
+    img: "https://images.unsplash.com/photo-1565008447742-97f6f38c985c?w=600&q=80",
+  },
+  {
+    label: "MINING & METALS",
+    img: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&q=80",
+  },
+  {
+    label: "REFINERIES",
+    img: "https://images.unsplash.com/photo-1580674684081-7617fbf3d745?w=600&q=80",
+  },
+  {
+    label: "POWER PLANTS",
+    img: "https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=600&q=80",
+  },
+  {
+    label: "EPC & INDUSTRIAL PROJECTS",
+    img: "https://images.unsplash.com/photo-1567521464027-f127ff144326?w=600&q=80",
+  },
 ];
 
 export default function IndustriesSection() {
   return (
-    <section className="bg-[#F7F7F5] py-24 md:py-32">
-      <div className="max-w-7xl mx-auto px-6">
-        <AnimateOnScroll>
-          <div className="text-center mb-16">
-            <div className="flex items-center justify-center gap-3 mb-6">
-              <span className="w-8 h-px bg-[#C8102E]" />
-              <span className="text-[#C8102E] text-sm font-semibold tracking-wide uppercase">صنایع</span>
-              <span className="w-8 h-px bg-[#C8102E]" />
-            </div>
-            <h2 className="text-4xl md:text-5xl font-black text-[#161616] leading-tight mb-4">
-              ساخته شده برای{" "}
-              <span className="text-[#C8102E]">صنایع پیچیده</span>
-            </h2>
-            <p className="text-[#6B6B6B] text-lg max-w-2xl mx-auto">
-              تجربه عمیق در صنایع مختلف، ما را قادر می‌سازد راهکارهای متناسب با هر بازار ارائه دهیم.
-            </p>
-          </div>
-        </AnimateOnScroll>
-
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+    <section className="bg-[#0a0a0b] py-24">
+      <div className="max-w-[1400px] mx-auto px-6">
+        <p className="text-[#c8973d] text-xs font-semibold tracking-[0.3em] uppercase mb-8">INDUSTRIES SERVED</p>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           {industries.map((ind, i) => (
-            <AnimateOnScroll key={ind.name} delay={i * 60}>
-              <Link href="/industries" className="group block">
-                <div className="bg-white border border-[#E9E6E1] rounded-sm p-6 text-center hover:border-[#C8102E]/30 hover:bg-[#0B0B0D] transition-all duration-300 card-hover">
-                  <div className="text-3xl mb-4 group-hover:scale-110 transition-transform">{ind.icon}</div>
-                  <h3 className="text-[#161616] group-hover:text-white font-bold text-sm mb-1 transition-colors">{ind.name}</h3>
-                  <p className="text-[#6B6B6B] group-hover:text-white/40 text-xs transition-colors">{ind.en}</p>
-                  <div className="mt-3 text-[#C8102E] text-xs font-semibold">{ind.count}</div>
-                </div>
-              </Link>
-            </AnimateOnScroll>
+            <div key={i} className="relative overflow-hidden group cursor-pointer" style={{ aspectRatio: "3/4" }}>
+              <div
+                className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                style={{ backgroundImage: `url(${ind.img})` }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+              <div className="absolute inset-0 border border-[#c8973d]/0 group-hover:border-[#c8973d]/40 transition-colors" />
+              <div className="absolute bottom-0 left-0 right-0 p-4">
+                <div className="text-white text-xs font-bold tracking-wider">{ind.label}</div>
+              </div>
+            </div>
           ))}
         </div>
-
-        <AnimateOnScroll delay={600}>
-          <div className="mt-12 text-center">
-            <Link
-              href="/industries"
-              className="inline-flex items-center gap-3 bg-[#0B0B0D] text-white font-semibold px-8 py-4 rounded-sm hover:bg-[#C8102E] transition-all"
-            >
-              مشاهده راهکارهای تخصصی هر صنعت ←
-            </Link>
-          </div>
-        </AnimateOnScroll>
       </div>
     </section>
   );

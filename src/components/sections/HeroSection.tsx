@@ -1,166 +1,126 @@
 "use client";
-
 import Link from "next/link";
-import { useEffect, useRef } from "react";
-import Counter from "@/components/Counter";
+
+const features = [
+  {
+    icon: (
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
+      </svg>
+    ),
+    label: "OIL & GAS",
+    sub: "EQUIPMENT",
+  },
+  {
+    icon: (
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+      </svg>
+    ),
+    label: "PETROCHEMICAL",
+    sub: "SUPPLY",
+  },
+  {
+    icon: (
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+      </svg>
+    ),
+    label: "COPPER",
+    sub: "EXPORT",
+  },
+  {
+    icon: (
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+      </svg>
+    ),
+    label: "DRILLING &",
+    sub: "OFFSHORE SOLUTIONS",
+  },
+];
 
 export default function HeroSection() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    let animFrame: number;
-    const nodes: { x: number; y: number; vx: number; vy: number; r: number; opacity: number }[] = [];
-
-    const resize = () => {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-    };
-    resize();
-    window.addEventListener("resize", resize);
-
-    for (let i = 0; i < 40; i++) {
-      nodes.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.4,
-        vy: (Math.random() - 0.5) * 0.4,
-        r: Math.random() * 3 + 1,
-        opacity: Math.random() * 0.6 + 0.2,
-      });
-    }
-
-    const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Draw connections
-      for (let i = 0; i < nodes.length; i++) {
-        for (let j = i + 1; j < nodes.length; j++) {
-          const dx = nodes[i].x - nodes[j].x;
-          const dy = nodes[i].y - nodes[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 150) {
-            ctx.beginPath();
-            ctx.strokeStyle = `rgba(200, 16, 46, ${0.15 * (1 - dist / 150)})`;
-            ctx.lineWidth = 0.5;
-            ctx.moveTo(nodes[i].x, nodes[i].y);
-            ctx.lineTo(nodes[j].x, nodes[j].y);
-            ctx.stroke();
-          }
-        }
-      }
-
-      // Draw nodes
-      nodes.forEach((n) => {
-        n.x += n.vx;
-        n.y += n.vy;
-        if (n.x < 0 || n.x > canvas.width) n.vx *= -1;
-        if (n.y < 0 || n.y > canvas.height) n.vy *= -1;
-
-        ctx.beginPath();
-        const grad = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r * 3);
-        grad.addColorStop(0, `rgba(200, 16, 46, ${n.opacity})`);
-        grad.addColorStop(1, "rgba(200, 16, 46, 0)");
-        ctx.fillStyle = grad;
-        ctx.arc(n.x, n.y, n.r * 3, 0, Math.PI * 2);
-        ctx.fill();
-      });
-
-      animFrame = requestAnimationFrame(draw);
-    };
-
-    draw();
-    return () => {
-      cancelAnimationFrame(animFrame);
-      window.removeEventListener("resize", resize);
-    };
-  }, []);
-
   return (
-    <section className="relative min-h-screen flex flex-col justify-center overflow-hidden bg-[#0B0B0D]">
-      {/* Grid overlay */}
-      <div
-        className="absolute inset-0 opacity-30"
-        style={{
-          backgroundImage: `linear-gradient(rgba(200,16,46,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(200,16,46,0.05) 1px, transparent 1px)`,
-          backgroundSize: "60px 60px",
-        }}
-      />
-
-      {/* Animated canvas */}
-      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
-
-      {/* Glow orbs */}
-      <div className="absolute top-1/4 right-1/4 w-96 h-96 rounded-full bg-[#C8102E]/10 blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 left-1/3 w-64 h-64 rounded-full bg-[#C8102E]/8 blur-2xl pointer-events-none" />
-
-      {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-6 pt-32 pb-20">
-        <div className="max-w-4xl">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-1.5 mb-8">
-            <span className="w-2 h-2 rounded-full bg-[#C8102E] animate-pulse" />
-            <span className="text-white/60 text-xs font-medium tracking-wide">
-              Iran Novin Advertising & Marketing Group
-            </span>
-          </div>
-
-          {/* Headline */}
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-white leading-tight mb-6">
-            رشد برندها،{" "}
-            <span className="text-[#C8102E]">با قدرت یکپارچه</span>{" "}
-            ایران‌نوین
-          </h1>
-
-          {/* Subheadline */}
-          <p className="text-lg md:text-xl text-white/60 leading-relaxed mb-10 max-w-3xl">
-            از استراتژی و خلاقیت تا رسانه، دیجیتال، تولید، تجربه و اجرا؛ ایران‌نوین شریک یکپارچه برندها
-            برای ساخت کمپین‌های اثرگذار و رشد پایدار است.
-          </p>
-
-          {/* CTAs */}
-          <div className="flex flex-wrap items-center gap-4 mb-16">
-            <Link
-              href="/services"
-              className="bg-[#C8102E] hover:bg-[#A50D25] text-white font-bold px-8 py-4 rounded-sm text-base transition-all hover:shadow-xl hover:shadow-red-900/30 hover:-translate-y-0.5"
-            >
-              مشاهده توانمندی‌ها
-            </Link>
-            <Link
-              href="/contact"
-              className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold px-8 py-4 rounded-sm text-base transition-all"
-            >
-              شروع همکاری
-            </Link>
-          </div>
-
-          {/* Stats strip */}
-          <div className="flex flex-wrap items-center gap-8 pt-8 border-t border-white/10">
-            {[
-              { value: 34, suffix: "+ سال", label: "تجربه در بازار ایران" },
-              { value: 700, suffix: "+", label: "متخصص و کارشناس" },
-              { value: 70, suffix: "+", label: "خدمت و توانمندی" },
-              { value: 500, suffix: "+", label: "برند همکار" },
-            ].map((stat) => (
-              <div key={stat.label} className="flex flex-col">
-                <span className="text-3xl font-black text-white">
-                  <Counter end={stat.value} suffix={stat.suffix} />
-                </span>
-                <span className="text-white/40 text-xs mt-0.5">{stat.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+    <section className="relative min-h-screen flex flex-col justify-center overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 z-0">
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `
+              linear-gradient(to right, rgba(10,10,11,0.95) 40%, rgba(10,10,11,0.5) 70%, rgba(10,10,11,0.3) 100%),
+              url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1800&q=80') center/cover no-repeat
+            `,
+          }}
+        />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(10,10,11,0.3) 0%, transparent 30%, transparent 70%, rgba(10,10,11,0.8) 100%)" }} />
       </div>
 
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
-        <span className="text-white/30 text-xs tracking-wider">اسکرول کنید</span>
-        <div className="w-px h-12 bg-gradient-to-b from-white/30 to-transparent" />
+      {/* Slide indicators - right side */}
+      <div className="absolute right-8 top-1/2 -translate-y-1/2 z-10 flex flex-col gap-3">
+        {["01", "02", "03", "04"].map((n, i) => (
+          <div key={n} className={`text-xs font-mono transition-all ${i === 0 ? "text-[#c8973d]" : "text-gray-600"}`}>
+            {n}
+          </div>
+        ))}
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10 max-w-[1400px] mx-auto px-6 pt-24 pb-16">
+        {/* Tag */}
+        <p className="text-[#c8973d] text-xs font-semibold tracking-[0.3em] uppercase mb-6">
+          STRATEGIC ENERGY & INDUSTRIAL SUPPLY PARTNER
+        </p>
+
+        {/* Headline */}
+        <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-white leading-none tracking-tight mb-6 max-w-3xl">
+          POWERING INDUSTRY.
+          <br />
+          DELIVERING TRUST.
+        </h1>
+
+        {/* Subtitle */}
+        <p className="text-gray-300 text-base max-w-lg mb-10 leading-relaxed">
+          Khabargan Energy connects global resources with regional potential
+          through secure supply, technical excellence and unwavering commitment.
+        </p>
+
+        {/* Feature icons */}
+        <div className="flex flex-wrap gap-6 mb-10">
+          {features.map((f, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <div className="text-[#c8973d]">{f.icon}</div>
+              <div className="text-white text-xs font-semibold leading-tight">
+                <div>{f.label}</div>
+                <div className="text-gray-400">{f.sub}</div>
+              </div>
+              {i < features.length - 1 && <div className="w-px h-8 bg-gray-700 ml-4" />}
+            </div>
+          ))}
+        </div>
+
+        {/* CTA buttons */}
+        <div className="flex flex-wrap gap-4">
+          <Link
+            href="/capabilities"
+            className="inline-flex items-center gap-2 bg-[#c8973d] text-black text-xs font-bold tracking-wider px-7 py-3.5 hover:bg-[#e8b86d] transition-colors"
+          >
+            EXPLORE OUR CAPABILITIES
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </Link>
+          <Link
+            href="/contact"
+            className="inline-flex items-center gap-2 border border-white/40 text-white text-xs font-bold tracking-wider px-7 py-3.5 hover:border-[#c8973d] hover:text-[#c8973d] transition-colors"
+          >
+            REQUEST PARTNERSHIP
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </Link>
+        </div>
       </div>
     </section>
   );

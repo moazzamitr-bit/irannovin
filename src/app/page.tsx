@@ -1,33 +1,23 @@
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import HeroSection from "@/components/sections/HeroSection";
-import RepositioningSection from "@/components/sections/RepositioningSection";
-import ModelSection from "@/components/sections/ModelSection";
-import ServicesSection from "@/components/sections/ServicesSection";
-import WorkSection from "@/components/sections/WorkSection";
+import StatsSection from "@/components/sections/StatsSection";
+import AboutSection from "@/components/sections/AboutSection";
+import DivisionsSection from "@/components/sections/DivisionsSection";
+import GlobalNetworkSection from "@/components/sections/GlobalNetworkSection";
+import CapabilitiesSection from "@/components/sections/CapabilitiesSection";
 import IndustriesSection from "@/components/sections/IndustriesSection";
-import WhySection from "@/components/sections/WhySection";
-import InsightsSection from "@/components/sections/InsightsSection";
-import CareersSection from "@/components/sections/CareersSection";
-import ContactSection from "@/components/sections/ContactSection";
-import ClientsSection from "@/components/sections/ClientsSection";
+import CTASection from "@/components/sections/CTASection";
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <main className="flex flex-col">
-      <Header />
+    <>
       <HeroSection />
-      <RepositioningSection />
-      <ClientsSection />
-      <ModelSection />
-      <ServicesSection />
-      <WorkSection />
+      <StatsSection />
+      <AboutSection />
+      <DivisionsSection />
+      <GlobalNetworkSection />
+      <CapabilitiesSection />
       <IndustriesSection />
-      <WhySection />
-      <InsightsSection />
-      <CareersSection />
-      <ContactSection />
-      <Footer />
-    </main>
+      <CTASection />
+    </>
   );
 }
