@@ -1,0 +1,22 @@
+{
+  "name": "garm-platform",
+  "private": true,
+  "version": "0.0.0",
+  "description": "GARM — digital precious-metals platform (Gold MVP). See docs/SPEC.md.",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

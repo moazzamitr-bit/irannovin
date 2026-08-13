@@ -47,6 +47,34 @@ points. Toman and grams are presentation-layer conversions only (SPEC §2.1).
 
 The client submits a `quote_id` and never a price or a computed total.
 
+### D-006 · Web/native split: Next.js + Expo over a shared core
+**Date:** 2026-08-13 · **Status:** SETTLED · **Supersedes:** OPEN-2
+
+`apps/web` is Next.js; `apps/client` is Expo for iOS and Android. Both build on
+`packages/core`, which holds the API client, generated types, business logic,
+formatting, and i18n catalogues. Only the UI layer differs.
+
+Chosen over a single Expo + `react-native-web` codebase because the web funnel
+matters for acquisition in this market, and `react-native-web` produces a
+heavy, SEO-hostile build with weaker RTL support than native CSS — plus the
+known difficulty of finding a charting library that behaves on both targets.
+
+The cost is accepted: two UI layers, and the discipline to keep logic in
+`packages/core` rather than letting it drift into either app.
+
+### D-007 · GARM ships from its own repository
+**Date:** 2026-08-13 · **Status:** SETTLED
+
+The platform and کانون ایران‌نوین are separate businesses and will not share a
+repository. The platform is self-contained under `garm/` in the interim; the
+agency site has been restored to its own repository root.
+
+The GitHub App available to this session cannot create repositories
+(`403 Resource not accessible by integration`), so the final move is a manual
+step — see the extraction instructions in `garm/README.md`. Nothing in the
+platform depends on its parent directory, so the move is a history-preserving
+subtree split rather than a migration.
+
 ---
 
 ## OPEN
@@ -61,22 +89,6 @@ Needs a brand and trademark check before the name is embedded in
 
 **Needed from operator:** final name, or explicit approval to proceed with a
 placeholder identifier that will be renamed before any store submission.
-
----
-
-### OPEN-2 · Web/native code-sharing strategy
-**Blocks:** Phase 0 (scaffolding) · **Expensive to reverse**
-
-| Option | Gains | Costs |
-|---|---|---|
-| **A.** Expo + `react-native-web`, one codebase | Single codebase; fastest to three surfaces | Heavy, SEO-hostile web build; weaker RTL than native CSS; charting works poorly across both targets; web feels like a ported app |
-| **B.** Next.js (web) + Expo (native), shared `packages/core` | Each surface gets a proper experience; strong SEO and RTL on web; existing Next.js work is reusable | More code; two UI layers to maintain; discipline needed to keep logic in `core` |
-
-**Recommendation: B**, if the web funnel matters for acquisition — which in
-this market it does. `packages/core` holds the API client, generated types,
-business logic, formatting, and i18n strings; only the UI layer differs.
-
-**Needed from operator:** a decision. Do not scaffold until it lands.
 
 ---
 
