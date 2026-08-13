@@ -34,10 +34,12 @@ already in the right place and runs unchanged.
 ```
 packages/
   financial/          Money, metal, pricing and treasury arithmetic.
+  domain/             Identity, access and risk policy — OTP, token rotation,
+                      KYC state machine, RBAC, risk-based step-up.
   providers/          External-system interfaces and deterministic mocks.
-  core/               Shared client logic — API client, types, i18n. (Phase 1)
+  core/               Shared client logic — API client, types, i18n. (next)
 apps/
-  api/                NestJS backend. (Phase 1)
+  api/                Prisma schema for identity/admin. NestJS wiring next.
   web/                Next.js. (Phase 1, per decision D-006)
   client/             Expo — iOS and Android. (Phase 1, per decision D-006)
 docs/                 Spec, decisions, audit, per-phase prompts.
@@ -55,17 +57,22 @@ npm run lint
 npm run test
 ```
 
-There is no API or client application yet. Phase 0 deliberately builds the
-financial core and the provider boundary first: both are pure TypeScript with no
-I/O, neither depends on the unresolved web/native decision, and they are the code
-where a silent defect costs the most.
+The packages are built before the applications on purpose: they are pure
+TypeScript with no I/O, they do not depend on the unresolved decisions in
+`DECISIONS.md`, and they hold the logic where a silent defect costs the most —
+money arithmetic and security policy.
 
 ## Current state
 
 | Package | Tests | Typecheck | Lint |
 |---|---|---|---|
 | `@garm/financial` | 70 passing | clean | clean, 0 warnings |
+| `@garm/domain` | 59 passing | clean | clean, 0 warnings |
 | `@garm/providers` | 13 passing | clean | clean, 0 warnings |
+| `@garm/api` | Prisma schema valid | — | — |
+
+**142 tests passing.** Unit and property-based tests run here; integration tests
+against a real Postgres are not yet written and need a running database.
 
 ## The rules that matter
 

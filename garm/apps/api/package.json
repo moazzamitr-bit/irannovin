@@ -1,0 +1,20 @@
+{
+  "name": "@garm/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "prisma:validate": "prisma validate",
+    "prisma:format": "prisma format",
+    "prisma:generate": "prisma generate",
+    "typecheck": "prisma validate"
+  },
+  "dependencies": {
+    "@garm/domain": "*",
+    "@garm/financial": "*",
+    "@garm/providers": "*"
+  },
+  "devDependencies": {
+    "prisma": "^6.19.0"
+  }
+}

@@ -1,0 +1,429 @@
+// GARM — Phase 1 schema: identity, sessions, KYC, admin, audit.
+// SPEC §80. Financial models (ledger, quotes, trades, treasury) arrive in
+// Phase 2 and are deliberately absent here rather than stubbed.
+//
+// Conventions enforced throughout:
+//   • Money is BigInt rial. Metal weight is BigInt micrograms. No Float, ever.
+//   • Sensitive identifiers are stored encrypted at the application layer
+//     (SPEC §77); the `Encrypted` suffix marks ciphertext columns.
+//   • Nothing financial or evidential is ever hard-deleted (SPEC §81).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Users
+// ---------------------------------------------------------------------------
+
+model User {
+  id                  String    @id @default(uuid())
+  /// The login identifier. Normalised to a single canonical format on write.
+  phone               String    @unique
+  /// Ciphertext. The plaintext national ID must never be logged or indexed.
+  nationalIdEncrypted String?
+  /// Deterministic hash, so a duplicate registration can be detected without
+  /// the plaintext being searchable.
+  nationalIdHash      String?   @unique
+  fullName            String?
+  birthDate           DateTime? @db.Date
+  email               String?
+
+  kycStatus KycStatus @default(NOT_STARTED)
+  /// Drives AML transaction and velocity limits (SPEC §75).
+  amlTier   Int       @default(0)
+
+  /// Argon2id. Absent until the customer sets one; never a login credential —
+  /// there is no password authentication (SPEC §15).
+  transactionPinHash        String?
+  transactionPinSetAt       DateTime?
+  transactionPinFailures    Int       @default(0)
+  transactionPinLockedUntil DateTime?
+
+  referralCode String  @unique
+  referredById String?
+  referredBy   User?   @relation("Referrals", fields: [referredById], references: [id])
+  referrals    User[]  @relation("Referrals")
+
+  /// Soft delete only — a compliance retention period outlives the request.
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  devices        Device[]
+  otpChallenges  OtpChallenge[]
+  kycCase        KycCase?
+  bankAccounts   BankAccount[]
+  securityEvents SecurityEvent[]
+
+  @@index([kycStatus])
+  @@index([createdAt])
+}
+
+enum KycStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  PENDING_PROVIDER
+  MANUAL_REVIEW
+  VERIFIED
+  REJECTED
+  NEEDS_UPDATE
+}
+
+// ---------------------------------------------------------------------------
+// Authentication
+// ---------------------------------------------------------------------------
+
+model Device {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  label       String
+  fingerprint String
+  lastIp      String?
+  userAgent   String?
+
+  firstSeenAt DateTime  @default(now())
+  lastSeenAt  DateTime  @default(now())
+  revokedAt   DateTime?
+
+  refreshTokens RefreshToken[]
+
+  @@unique([userId, fingerprint])
+  @@index([userId, revokedAt])
+}
+
+/// Rotating refresh tokens with reuse detection (SPEC §15).
+///
+/// Every token descended from one login shares `familyId`. Presenting a token
+/// whose status is already ROTATED means a copy leaked, and the whole family is
+/// revoked — see `evaluateRefresh` in @garm/domain.
+model RefreshToken {
+  id       String @id @default(uuid())
+  familyId String
+  deviceId String
+  device   Device @relation(fields: [deviceId], references: [id])
+
+  /// Only the hash is stored. A database leak must not yield usable tokens.
+  tokenHash   String      @unique
+  status      TokenStatus @default(ACTIVE)
+  /// Points at the successor, so a reuse can be traced to when it happened.
+  rotatedToId String?
+
+  issuedAt  DateTime  @default(now())
+  expiresAt DateTime
+  revokedAt DateTime?
+
+  @@index([familyId, status])
+  @@index([deviceId])
+}
+
+enum TokenStatus {
+  ACTIVE
+  ROTATED
+  REVOKED
+}
+
+/// The code is stored hashed and is never returned, logged, or included in an
+/// error message (SPEC §16).
+model OtpChallenge {
+  id     String  @id @default(uuid())
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+
+  phone    String
+  codeHash String
+  purpose  OtpPurpose
+  attempts Int        @default(0)
+
+  requestIp  String?
+  createdAt  DateTime  @default(now())
+  expiresAt  DateTime
+  consumedAt DateTime?
+
+  @@index([phone, createdAt])
+  @@index([expiresAt])
+}
+
+enum OtpPurpose {
+  LOGIN
+  DEVICE_VERIFICATION
+  TRANSACTION_PIN_RESET
+}
+
+/// Append-only record of anything security-relevant on a customer account.
+model SecurityEvent {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  kind      SecurityEventKind
+  detail    Json?
+  ip        String?
+  userAgent String?
+  createdAt DateTime          @default(now())
+
+  @@index([userId, createdAt])
+  @@index([kind, createdAt])
+}
+
+enum SecurityEventKind {
+  LOGIN_SUCCEEDED
+  LOGIN_FAILED
+  NEW_DEVICE
+  DEVICE_REVOKED
+  REFRESH_REUSE_DETECTED
+  PIN_SET
+  PIN_FAILED
+  PIN_LOCKED
+  BANK_ACCOUNT_ADDED
+  BANK_ACCOUNT_REJECTED
+  STEP_UP_CHALLENGED
+}
+
+// ---------------------------------------------------------------------------
+// KYC
+// ---------------------------------------------------------------------------
+
+model KycCase {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  status        KycStatus @default(NOT_STARTED)
+  /// Which steps this case must satisfy. Snapshotted at creation so a later
+  /// policy change does not retroactively invalidate a verified customer.
+  requiredSteps Json
+
+  reviewedByAdminId String?
+  decisionReason    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  steps KycStepRecord[]
+
+  @@index([status, createdAt])
+}
+
+model KycStepRecord {
+  id     String  @id @default(uuid())
+  caseId String
+  case   KycCase @relation(fields: [caseId], references: [id])
+
+  step   KycStepKind
+  status KycStepStatus @default(PENDING)
+
+  /// Which vendor answered. Recorded so a provider switch stays auditable.
+  providerName              String?
+  providerRef               String?
+  /// Ciphertext — provider payloads carry personal data (SPEC §77).
+  providerResponseEncrypted String?
+
+  createdAt  DateTime  @default(now())
+  resolvedAt DateTime?
+
+  @@index([caseId, step])
+}
+
+enum KycStepKind {
+  IDENTITY
+  MOBILE_OWNERSHIP
+  DOCUMENT
+  LIVENESS
+  BANK_ACCOUNT
+}
+
+enum KycStepStatus {
+  PENDING
+  PASSED
+  FAILED
+}
+
+/// Withdrawal destinations. Only accounts proven to belong to the verified
+/// customer are usable (SPEC §42, §50).
+model BankAccount {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  ibanEncrypted String
+  ibanMasked    String
+  bankName      String?
+
+  /// Verified against a national-ID match — a separate service and a separate
+  /// provider from Shahkar mobile ownership (SPEC §19).
+  ownerMatchVerified Boolean   @default(false)
+  verifiedAt         DateTime?
+  verificationRef    String?
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, deletedAt])
+}
+
+// ---------------------------------------------------------------------------
+// Administration
+// ---------------------------------------------------------------------------
+
+model AdminUser {
+  id    String @id @default(uuid())
+  email String @unique
+  name  String
+
+  /// Argon2id (SPEC §77). Admin authentication is separate from the customer
+  /// realm and never shares a token audience.
+  passwordHash        String
+  totpSecretEncrypted String?
+
+  disabledAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  roles AdminRoleAssignment[]
+
+  @@index([disabledAt])
+}
+
+/// Roles are an enum rather than free-form rows: the permission mapping lives
+/// in code (@garm/domain rbac.ts) where it is unit tested, so a database write
+/// cannot invent a capability the application does not implement. In
+/// particular there is no balance-edit permission to assign (SPEC §64).
+model AdminRoleAssignment {
+  id      String    @id @default(uuid())
+  adminId String
+  admin   AdminUser @relation(fields: [adminId], references: [id])
+
+  role      AdminRole
+  grantedBy String
+  grantedAt DateTime  @default(now())
+  revokedAt DateTime?
+
+  @@unique([adminId, role])
+  @@index([role, revokedAt])
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  OPERATIONS
+  FINANCE
+  TREASURY
+  COMPLIANCE
+  KYC_REVIEWER
+  SUPPORT
+  SECURITY_AUDITOR
+  INCIDENT_COMMANDER
+}
+
+/// Immutable. No application path updates or deletes a row here (SPEC §69).
+model AuditLog {
+  id String @id @default(uuid())
+
+  actorType ActorType
+  actorId   String?
+  actorRole String?
+
+  action   String
+  entity   String
+  entityId String?
+
+  before Json?
+  after  Json?
+  reason String?
+
+  ip            String?
+  userAgent     String?
+  correlationId String?
+
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([actorId, createdAt])
+  @@index([createdAt])
+}
+
+enum ActorType {
+  USER
+  ADMIN
+  SYSTEM
+}
+
+// ---------------------------------------------------------------------------
+// Operational control
+// ---------------------------------------------------------------------------
+
+/// Kill switches (SPEC §60). Changes propagate over Redis pub/sub for speed,
+/// but this table is authoritative — an instance that missed a message re-reads
+/// it rather than trading on stale permission (SPEC §61).
+model OperationalFlag {
+  key       OperationalFlagKey @id
+  enabled   Boolean
+  reason    String?
+  changedBy String
+  changedAt DateTime           @updatedAt
+}
+
+enum OperationalFlagKey {
+  TRADING_ENABLED
+  BUY_ENABLED
+  SELL_ENABLED
+  DEPOSIT_ENABLED
+  WITHDRAWAL_ENABLED
+  PHYSICAL_DELIVERY_ENABLED
+}
+
+/// Guarantees an operation runs at most once no matter how often a flaky mobile
+/// connection retries it (SPEC §38).
+model IdempotencyRecord {
+  key      String  @id
+  userId   String?
+  endpoint String
+
+  /// Same key with a different body is a conflict, not a replay.
+  requestHash  String
+  responseBody Json?
+  status       IdempotencyStatus @default(IN_PROGRESS)
+
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@index([expiresAt])
+  @@index([userId, endpoint])
+}
+
+enum IdempotencyStatus {
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+}
+
+/// Side effects written inside the same transaction as the state change they
+/// describe, then delivered asynchronously (SPEC §70).
+model OutboxEvent {
+  id        String @id @default(uuid())
+  aggregate String
+  eventType String
+  payload   Json
+
+  status        OutboxStatus @default(PENDING)
+  attempts      Int          @default(0)
+  nextAttemptAt DateTime     @default(now())
+  lastError     String?
+
+  createdAt   DateTime  @default(now())
+  publishedAt DateTime?
+
+  @@index([status, nextAttemptAt])
+}
+
+enum OutboxStatus {
+  PENDING
+  PUBLISHED
+  FAILED
+}
