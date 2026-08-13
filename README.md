@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GARM — digital precious-metals platform
 
-## Getting Started
+Monorepo for the Gold MVP described in [`docs/SPEC.md`](docs/SPEC.md).
 
-First, run the development server:
+`GARM` is an internal codename only. The final name is unresolved — see
+[OPEN-1](docs/DECISIONS.md) — and appears nowhere user-visible.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## Layout
+
+```
+apps/
+  irannovin/          Pre-existing کانون ایران‌نوین marketing site (Next.js 16).
+                      Unrelated to the metals platform; preserved intact.
+                      See docs/current-architecture.md §1.
+packages/
+  financial/          Money, metal, pricing and treasury arithmetic.
+  providers/          External-system interfaces and deterministic mocks.
+docs/                 Spec, decisions, audit, readiness.
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Setup
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Requires Node 22+ and Docker.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm install                 # install all workspaces
+docker compose up -d        # postgres + redis for local development
+npm run typecheck
+npm run lint
+npm run test
+```
 
-## Learn More
+There is no API or client application yet. Phase 0 deliberately builds the
+financial core and the provider boundary first: both are pure TypeScript with no
+I/O, neither depends on the unresolved web/native decision, and they are the code
+where a silent defect costs the most.
 
-To learn more about Next.js, take a look at the following resources:
+## Current state
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Package | Tests | Typecheck | Lint |
+|---|---|---|---|
+| `@garm/financial` | 70 passing | clean | clean, 0 warnings |
+| `@garm/providers` | 13 passing | clean | clean, 0 warnings |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## The rules that matter
 
-## Deploy on Vercel
+Full detail in [`docs/SPEC.md`](docs/SPEC.md). The ones that shape everything
+else:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **No floating point in financial code.** Rial and micrograms are `BIGINT`;
+  rates are basis points. `packages/financial` is the only module permitted to
+  do financial arithmetic.
+- **Rial is canonical, toman is display.** Micrograms are canonical, grams are
+  display. Conversion happens at the edge and never flows back inward.
+- **The ledger is double-entry and append-only.** Balances are derived, never
+  authoritative. Corrections are reversing entries.
+- **Never optimistically update a financial balance.** Show the real
+  intermediate state until the server confirms.
+- **Weight is meaningless without purity and basis.** 705 melted gold and 750
+  retail gold are different things; fine content and gross weight are different
+  numbers. Both are explicit in the type system.
+- **Spread is not a revenue line.** It is a component of realised inventory P&L.
+  Booking both double-counts.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Documentation
+
+| Document | Contents |
+|---|---|
+| [`docs/SPEC.md`](docs/SPEC.md) | The build specification — the source of truth |
+| [`docs/DECISIONS.md`](docs/DECISIONS.md) | Settled and open architecture decisions |
+| [`docs/current-architecture.md`](docs/current-architecture.md) | Phase 0 repository audit |
+| [`docs/prompts/`](docs/prompts/) | Per-phase implementation prompts |
+| [`docs/gerami-analysis-and-plan.md`](docs/gerami-analysis-and-plan.md) | Competitor teardown that informed the spec |
+
+## Open decisions blocking further work
+
+`OPEN-1` (product name) and `OPEN-2` (web/native code-sharing strategy) block
+client scaffolding. `OPEN-3` (licence strategy) and `OPEN-4` (hedging posture)
+must be answered before the treasury phase. See
+[`docs/DECISIONS.md`](docs/DECISIONS.md).
+
+No secrets belong in this repository. Environment variables are documented in
+each app's `.env.example` as those apps are created.
