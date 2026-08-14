@@ -4,10 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "prisma:validate": "prisma validate",
+    "prisma:validate": "DATABASE_URL=\"${DATABASE_URL:-postgresql://garm:garm@localhost:5432/garm?schema=public}\" prisma validate",
     "prisma:format": "prisma format",
     "prisma:generate": "prisma generate",
-    "typecheck": "prisma validate"
+    "typecheck": "DATABASE_URL=\"${DATABASE_URL:-postgresql://garm:garm@localhost:5432/garm?schema=public}\" prisma validate"
   },
   "dependencies": {
     "@garm/domain": "*",
