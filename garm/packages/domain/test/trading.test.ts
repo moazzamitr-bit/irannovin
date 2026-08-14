@@ -250,7 +250,7 @@ describe('trade state machine', () => {
     // metal cannot be delivered.
     let state: TradeState = 'CREATED';
     state = transitionTrade(state, 'QUOTE_LOCKED');
-    state = transitionTrade(state, 'INVENTORY_RESERVED');
+    state = transitionTrade(state, 'ASSETS_RESERVED');
     state = transitionTrade(state, 'PAYMENT_PENDING');
     expect(state).toBe('PAYMENT_PENDING');
     expect(canTransitionTrade('QUOTE_LOCKED', 'PAYMENT_PENDING')).toBe(false);
@@ -259,7 +259,7 @@ describe('trade state machine', () => {
   it('walks the full happy path', () => {
     const path: TradeState[] = [
       'QUOTE_LOCKED',
-      'INVENTORY_RESERVED',
+      'ASSETS_RESERVED',
       'PAYMENT_PENDING',
       'PAYMENT_CONFIRMED',
       'TRADE_COMMITTING',

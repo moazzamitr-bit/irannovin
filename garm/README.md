@@ -42,9 +42,10 @@ packages/
   providers/          External-system interfaces and deterministic mocks.
   core/               Shared client logic — API client, types, i18n. (next)
 apps/
-  api/                Prisma schema for identity/admin. NestJS wiring next.
-  web/                Next.js. (Phase 1, per decision D-006)
-  client/             Expo — iOS and Android. (Phase 1, per decision D-006)
+  api/                Trading service, repository ports, in-memory adapters,
+                      Prisma schema. HTTP layer and Prisma adapter next.
+  web/                Next.js. (not started, per decision D-006)
+  client/             Expo — iOS and Android. (not started, per decision D-006)
 docs/                 Spec, decisions, audit, per-phase prompts.
 ```
 
@@ -73,10 +74,12 @@ money arithmetic and security policy.
 | `@garm/domain` | 94 passing | clean | clean, 0 warnings |
 | `@garm/ledger` | 26 passing | clean | clean, 0 warnings |
 | `@garm/providers` | 13 passing | clean | clean, 0 warnings |
-| `@garm/api` | Prisma schema valid | — | — |
+| `@garm/api` | 19 passing | clean | clean, 0 warnings |
 
-**203 tests passing.** Unit and property-based tests run here; integration tests
-against a real Postgres are not yet written and need a running database.
+**222 tests passing.** Unit, property-based, and service-level tests run here.
+The service tests drive the whole trade path — quote, reserve, execute, post,
+verify — against in-memory adapters, so sequencing and invariants are covered
+without a database. Real locking and true concurrency still need Postgres.
 
 ## The rules that matter
 

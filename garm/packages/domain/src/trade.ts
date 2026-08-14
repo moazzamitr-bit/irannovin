@@ -3,12 +3,12 @@
  *
  * ## The ordering that matters
  *
- * Inventory is soft-reserved when the quote is issued — *before* the customer
- * pays. An earlier draft of this design checked capacity after payment, which
- * creates a state where the platform has taken the money and cannot deliver the
- * metal. Reserving first converts that post-payment failure into a
- * pre-payment refusal, which costs a customer a retry instead of a refund and a
- * complaint.
+ * Assets are reserved when the quote is issued — *before* any money moves. On a
+ * buy that is treasury capacity; on a sell it is the customer's own metal. An
+ * earlier draft checked capacity after payment, which creates a state where the
+ * platform has taken the money and cannot deliver the metal. Reserving first
+ * turns that post-payment failure into a pre-payment refusal, which costs a
+ * customer a retry instead of a refund and a complaint.
  *
  * The ledger posting is the commit point. The customer owns their metal the
  * moment `LEDGER_POSTED` succeeds. Custody allocation happens afterwards and
@@ -23,7 +23,7 @@
 export type TradeState =
   | 'CREATED'
   | 'QUOTE_LOCKED'
-  | 'INVENTORY_RESERVED'
+  | 'ASSETS_RESERVED'
   | 'PAYMENT_PENDING'
   | 'PAYMENT_CONFIRMED'
   | 'TRADE_COMMITTING'
@@ -42,8 +42,11 @@ export type TradeState =
 
 const TRANSITIONS: Readonly<Record<TradeState, readonly TradeState[]>> = {
   CREATED: ['QUOTE_LOCKED', 'REJECTED'],
-  QUOTE_LOCKED: ['INVENTORY_RESERVED', 'QUOTE_EXPIRED', 'CAPACITY_UNAVAILABLE', 'REJECTED'],
-  INVENTORY_RESERVED: ['PAYMENT_PENDING', 'QUOTE_EXPIRED', 'REJECTED'],
+  QUOTE_LOCKED: ['ASSETS_RESERVED', 'QUOTE_EXPIRED', 'CAPACITY_UNAVAILABLE', 'REJECTED'],
+  // A buy waits on an external payment; a sell does not — the platform is the
+  // one paying out, so it goes straight to committing once the customer's metal
+  // is reserved.
+  ASSETS_RESERVED: ['PAYMENT_PENDING', 'TRADE_COMMITTING', 'QUOTE_EXPIRED', 'REJECTED'],
   PAYMENT_PENDING: ['PAYMENT_CONFIRMED', 'PAYMENT_FAILED', 'PAYMENT_UNKNOWN'],
   // An UNKNOWN payment is not a failure. Reconciliation resolves it either way,
   // so it must be able to reach both outcomes (SPEC §40).
