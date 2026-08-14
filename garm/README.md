@@ -34,8 +34,9 @@ already in the right place and runs unchanged.
 ```
 packages/
   financial/          Money, metal, pricing and treasury arithmetic.
-  domain/             Identity, access and risk policy — OTP, token rotation,
-                      KYC state machine, RBAC, risk-based step-up.
+  domain/             Identity, access, risk and trading policy — OTP, token
+                      rotation, KYC, RBAC, step-up, price-feed guards, quote
+                      lifecycle, trade state machine.
   ledger/             Double-entry journal and posting builders. The financial
                       source of truth.
   providers/          External-system interfaces and deterministic mocks.
@@ -69,12 +70,12 @@ money arithmetic and security policy.
 | Package | Tests | Typecheck | Lint |
 |---|---|---|---|
 | `@garm/financial` | 70 passing | clean | clean, 0 warnings |
-| `@garm/domain` | 59 passing | clean | clean, 0 warnings |
+| `@garm/domain` | 94 passing | clean | clean, 0 warnings |
 | `@garm/ledger` | 26 passing | clean | clean, 0 warnings |
 | `@garm/providers` | 13 passing | clean | clean, 0 warnings |
 | `@garm/api` | Prisma schema valid | — | — |
 
-**168 tests passing.** Unit and property-based tests run here; integration tests
+**203 tests passing.** Unit and property-based tests run here; integration tests
 against a real Postgres are not yet written and need a running database.
 
 ## The rules that matter

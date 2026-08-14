@@ -12,3 +12,6 @@ export * from './session.js';
 export * from './kyc.js';
 export * from './rbac.js';
 export * from './stepup.js';
+export * from './pricefeed.js';
+export * from './quote.js';
+export * from './trade.js';

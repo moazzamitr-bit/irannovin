@@ -10,13 +10,13 @@ import {
   type AdjustmentRequest,
 } from '../src/rbac.js';
 import {
-  canTransition,
+  canTransitionKyc,
   DEFAULT_KYC_CONFIGURATION,
   deriveStatus,
   KycTransitionError,
   permits,
   remainingSteps,
-  transition,
+  transitionKyc,
   type StepOutcome,
 } from '../src/kyc.js';
 import {
@@ -115,22 +115,22 @@ describe('maker-checker adjustments (SPEC §65)', () => {
 
 describe('KYC state machine', () => {
   it('walks the ordinary path', () => {
-    expect(transition('NOT_STARTED', 'IN_PROGRESS')).toBe('IN_PROGRESS');
-    expect(transition('IN_PROGRESS', 'PENDING_PROVIDER')).toBe('PENDING_PROVIDER');
-    expect(transition('PENDING_PROVIDER', 'VERIFIED')).toBe('VERIFIED');
+    expect(transitionKyc('NOT_STARTED', 'IN_PROGRESS')).toBe('IN_PROGRESS');
+    expect(transitionKyc('IN_PROGRESS', 'PENDING_PROVIDER')).toBe('PENDING_PROVIDER');
+    expect(transitionKyc('PENDING_PROVIDER', 'VERIFIED')).toBe('VERIFIED');
   });
 
   it('refuses to skip straight from not-started to verified', () => {
-    expect(() => transition('NOT_STARTED', 'VERIFIED')).toThrow(KycTransitionError);
+    expect(() => transitionKyc('NOT_STARTED', 'VERIFIED')).toThrow(KycTransitionError);
   });
 
   it('treats VERIFIED and REJECTED as terminal', () => {
-    expect(canTransition('VERIFIED', 'IN_PROGRESS')).toBe(false);
-    expect(canTransition('REJECTED', 'IN_PROGRESS')).toBe(false);
+    expect(canTransitionKyc('VERIFIED', 'IN_PROGRESS')).toBe(false);
+    expect(canTransitionKyc('REJECTED', 'IN_PROGRESS')).toBe(false);
   });
 
   it('lets a case that needs an update be resumed', () => {
-    expect(transition('NEEDS_UPDATE', 'IN_PROGRESS')).toBe('IN_PROGRESS');
+    expect(transitionKyc('NEEDS_UPDATE', 'IN_PROGRESS')).toBe('IN_PROGRESS');
   });
 });
 

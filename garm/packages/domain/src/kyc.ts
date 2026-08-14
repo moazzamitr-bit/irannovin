@@ -56,7 +56,7 @@ const ALLOWED_TRANSITIONS: Readonly<Record<KycStatus, readonly KycStatus[]>> = {
   REJECTED: [],
 };
 
-export function canTransition(from: KycStatus, to: KycStatus): boolean {
+export function canTransitionKyc(from: KycStatus, to: KycStatus): boolean {
   return (ALLOWED_TRANSITIONS[from] ?? []).includes(to);
 }
 
@@ -67,8 +67,8 @@ export class KycTransitionError extends Error {
   }
 }
 
-export function transition(from: KycStatus, to: KycStatus): KycStatus {
-  if (!canTransition(from, to)) {
+export function transitionKyc(from: KycStatus, to: KycStatus): KycStatus {
+  if (!canTransitionKyc(from, to)) {
     throw new KycTransitionError(from, to);
   }
   return to;
