@@ -59,7 +59,14 @@ docker compose up -d        # postgres + redis for local development
 npm run typecheck
 npm run lint
 npm run test
+
+npm run demo -w @garm/api   # walk the whole trade path and print what happens
 ```
+
+There is no UI and no running server yet. `npm run demo` is the closest thing
+to seeing the system work: it drives the real services against the in-memory
+adapters and prints the quote, the ledger entries, the refusal paths, and the
+final balances.
 
 The packages are built before the applications on purpose: they are pure
 TypeScript with no I/O, they do not depend on the unresolved decisions in
